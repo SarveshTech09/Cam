@@ -1,8 +1,9 @@
 'use client';
 
-import React from "react";
-import { Button, Checkbox, Form, Grid, Input, theme, Typography } from "antd";
+import React, { useState } from "react";
+import { Button, Checkbox, Form, Grid, Input, theme, Typography, message } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import { useAuth } from '@/lib/authContext';
 
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
@@ -17,9 +18,27 @@ interface FormValues {
 export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
-  const onFinish = (values: FormValues) => {
-    console.log("Received values of form: ", values);
+  const onFinish = async (values: FormValues) => {
+    setLoading(true);
+    try {
+      const { user, error } = await signIn(values.email, values.password);
+
+      if (error) {
+        message.error(error);
+      } else if (user) {
+        message.success('Login successful!');
+        console.log("User logged in:", user);
+        // In a real app, you would redirect to dashboard or store user session
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
+      message.error('An error occurred during sign in');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const styles = {
@@ -131,7 +150,7 @@ export default function App() {
             </a>
           </Form.Item>
           <Form.Item style={{ marginBottom: "0px" }}>
-            <Button block={true} type="primary" htmlType="submit">
+            <Button block={true} type="primary" htmlType="submit" loading={loading}>
               Log in
             </Button>
             <div style={styles.footer}>

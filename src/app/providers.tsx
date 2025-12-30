@@ -3,6 +3,7 @@
 import { ConfigProvider, theme } from 'antd';
 import type { ThemeConfig } from 'antd';
 import { useTheme } from 'next-themes';
+import { AuthProvider } from '@/lib/authContext';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -35,8 +36,10 @@ export default function Providers({ children }: ProvidersProps) {
     };
 
   return (
-    <ConfigProvider theme={antdTheme}>
-      {children}
-    </ConfigProvider>
+    <AuthProvider>
+      <ConfigProvider theme={antdTheme}>
+        {children}
+      </ConfigProvider>
+    </AuthProvider>
   );
 }

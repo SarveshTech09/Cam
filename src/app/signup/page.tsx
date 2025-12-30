@@ -1,8 +1,9 @@
 'use client';
 
-import React from "react";
-import { Button, Form, Grid, Input, theme, Typography } from "antd";
+import React, { useState } from "react";
+import { Button, Form, Grid, Input, theme, Typography, message } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import { authService } from '@/lib/authService';
 
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
@@ -18,9 +19,30 @@ interface FormValues {
 export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = (values: FormValues) => {
-    console.log("Received values of form: ", values);
+  const onFinish = async (values: FormValues) => {
+    setLoading(true);
+    try {
+      const { user, error } = await authService.signUp({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) {
+        message.error(error);
+      } else if (user) {
+        message.success('Account created successfully!');
+        console.log("User created:", user);
+        // In a real app, you would redirect to login or dashboard
+      }
+    } catch (error) {
+      console.error("Sign up error:", error);
+      message.error('An error occurred during sign up');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const styles = {
@@ -159,7 +181,7 @@ export default function App() {
             />
           </Form.Item>
           <Form.Item style={{ marginBottom: "0px" }}>
-            <Button block type="primary" htmlType="submit">
+            <Button block type="primary" htmlType="submit" loading={loading}>
               Sign up
             </Button>
             <div style={{ marginTop: token.marginLG, textAlign: "center" as const }}>
