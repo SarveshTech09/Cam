@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Button, Form, Grid, Input, theme, Typography, message } from "antd";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
-import { authService } from '@/lib/authService';
+import { useAuth } from '@/lib/authContext';
+import { useRouter } from 'next/navigation';
 
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
@@ -20,22 +21,21 @@ export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
   const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
+  const router = useRouter();
 
   const onFinish = async (values: FormValues) => {
     setLoading(true);
     try {
-      const { user, error } = await authService.signUp({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      });
+      const { user, error } = await signUp(values.name, values.email, values.password);
 
       if (error) {
         message.error(error);
       } else if (user) {
         message.success('Account created successfully!');
         console.log("User created:", user);
-        // In a real app, you would redirect to login or dashboard
+        // Redirect to home page after successful signup
+        router.push('/home');
       }
     } catch (error) {
       console.error("Sign up error:", error);

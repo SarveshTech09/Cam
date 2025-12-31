@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from "react";
-import { Button, Checkbox, Form, Grid, Input, theme, Typography, message } from "antd";
-import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Button, Checkbox, Form, Grid, Input, theme, Typography, message, Flex, Card } from "antd";
+import { LockOutlined, MailOutlined, LoginOutlined, PictureOutlined, UploadOutlined } from "@ant-design/icons";
 import { useAuth } from '@/lib/authContext';
+import { useRouter } from 'next/navigation';
 
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
@@ -19,7 +20,15 @@ export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
+  const router = useRouter();
+
+  // Redirect to home page if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/home');
+    }
+  }, [user, router]);
 
   const onFinish = async (values: FormValues) => {
     setLoading(true);
@@ -31,7 +40,8 @@ export default function App() {
       } else if (user) {
         message.success('Login successful!');
         console.log("User logged in:", user);
-        // In a real app, you would redirect to dashboard or store user session
+        // Redirect to home page after successful login
+        router.push('/home');
       }
     } catch (error) {
       console.error("Sign in error:", error);
@@ -76,6 +86,11 @@ export default function App() {
       fontSize: screens.md ? token.fontSizeHeading2 : token.fontSizeHeading3
     }
   };
+
+  // Don't render the login form if user is already logged in
+  if (user) {
+    return null; // This will be handled by the redirect in useEffect
+  }
 
   return (
     <section style={styles.section}>
@@ -159,6 +174,26 @@ export default function App() {
             </div>
           </Form.Item>
         </Form>
+        
+        {/* Quick access to gallery and upload pages for demo purposes */}
+        <div style={{ marginTop: token.marginLG }}>
+          <Flex vertical gap={token.marginXS}>
+            <Button 
+              icon={<PictureOutlined />} 
+              onClick={() => router.push('/gallery')}
+              block
+            >
+              View Gallery
+            </Button>
+            <Button 
+              icon={<UploadOutlined />} 
+              onClick={() => router.push('/upload')}
+              block
+            >
+              Upload Images
+            </Button>
+          </Flex>
+        </div>
       </div>
     </section>
   );

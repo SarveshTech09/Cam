@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = () => {
     setUser(null);
-    // In a real app, you would also clear the stored token
+    authService.signOut(); // Call the signOut function from authService to remove token
   };
 
   const updateUser = async (data: Partial<UserData>) => {
